@@ -3,7 +3,8 @@ package dodo.open.sdk.internal.island
 import dodo.open.sdk.api.island.Channel
 import dodo.open.sdk.internal.bot.RealBot
 import dodo.open.sdk.internal.network.exception.DodoException
-import dodo.open.sdk.internal.network.packet.PacketPlayOutTextMessage
+import dodo.open.sdk.internal.network.packet.clientbound.PacketMessage
+import dodo.open.sdk.internal.network.packet.common.MessageBodyText
 import dodo.open.sdk.internal.util.asyncExecute
 
 data class RealChannel(
@@ -17,7 +18,7 @@ data class RealChannel(
     override val groupName: String
 ) : Channel {
     override fun sendMessage(message: String) = bot.services.channel
-        .setChannelMessageSend(PacketPlayOutTextMessage(channelId, message))
+        .setChannelMessageSend(PacketMessage(channelId, MessageBodyText(message), 1))
         .asyncExecute()
         .thenApply {
             if (it.status != 0) { throw DodoException(it.message) }

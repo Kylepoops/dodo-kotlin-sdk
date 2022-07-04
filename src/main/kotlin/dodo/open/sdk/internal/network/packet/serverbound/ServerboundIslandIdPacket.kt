@@ -1,9 +1,8 @@
-package dodo.open.sdk.internal.network.packet
+package dodo.open.sdk.internal.network.packet.serverbound
 
 import dodo.open.sdk.internal.network.annontation.DodoRequestPacket
 
 @DodoRequestPacket
-data class PacketPlayOutMemberInfo(
-    val dodoId: String,
+data class ServerboundIslandIdPacket(
     val islandId: String
 )

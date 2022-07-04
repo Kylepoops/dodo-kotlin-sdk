@@ -1,8 +1,12 @@
 package dodo.open.sdk.internal.util
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jsonMapper
+import dodo.open.sdk.internal.jackson.MessageBodyDeserializer
+import dodo.open.sdk.internal.network.packet.common.MessageBody
 import retrofit2.Call
 import retrofit2.Response
 import java.util.concurrent.CompletableFuture
@@ -16,7 +20,11 @@ val jsonMapper = jsonMapper {
         .configure(KotlinFeature.StrictNullChecks, false)
         .build()
 
+    val simpleModule = SimpleModule()
+        .addDeserializer(MessageBody::class.java, MessageBodyDeserializer())
+
     addModule(kotlinModule)
+    addModule(simpleModule)
 }
 
 fun <T> Call<T>.asyncExecute(): CompletableFuture<T> {
@@ -33,3 +41,5 @@ fun <T> Call<T>.asyncExecute(): CompletableFuture<T> {
     })
     return future
 }
+
+inline fun <reified T> referType() = object : TypeReference<T>() {}

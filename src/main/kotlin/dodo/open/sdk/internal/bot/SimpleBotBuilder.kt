@@ -20,13 +20,8 @@ class SimpleBotBuilder : BotBuilder {
         return this
     }
 
-    override fun withMessageHandler(handler: (Message) -> Unit): BotBuilder {
-        messageHandler = handler
-        return this
-    }
-
     override fun build(): Bot {
         val auth = Authorization(clientId, token)
-        return RealBot(auth, messageHandler)
+        return RealBot(auth)
     }
 }

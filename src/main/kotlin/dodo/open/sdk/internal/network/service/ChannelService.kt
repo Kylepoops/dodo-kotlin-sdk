@@ -1,22 +1,22 @@
 package dodo.open.sdk.internal.network.service
 
-import dodo.open.sdk.internal.network.packet.PacketPlayInChannelInfo
-import dodo.open.sdk.internal.network.packet.PacketPlayInChannelList
-import dodo.open.sdk.internal.network.packet.PacketPlayInMessageId
-import dodo.open.sdk.internal.network.packet.PacketPlayOutChannelId
-import dodo.open.sdk.internal.network.packet.PacketPlayOutIslandId
-import dodo.open.sdk.internal.network.packet.PacketPlayOutTextMessage
+import dodo.open.sdk.internal.network.packet.clientbound.ClientboundPacket
+import dodo.open.sdk.internal.network.packet.clientbound.PacketChannel
+import dodo.open.sdk.internal.network.packet.clientbound.PacketMessageId
+import dodo.open.sdk.internal.network.packet.clientbound.PacketMessage
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundChannelIdPacket
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundIslandIdPacket
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ChannelService {
     @POST("channel/list")
-    fun getChannelList(@Body packet: PacketPlayOutIslandId): Call<PacketPlayInChannelList>
+    fun getChannelList(@Body packet: ServerboundIslandIdPacket): Call<ClientboundPacket<List<PacketChannel>>>
 
     @POST("channel/info")
-    fun getChannelInfo(@Body packet: PacketPlayOutChannelId): Call<PacketPlayInChannelInfo>
+    fun getChannelInfo(@Body packet: ServerboundChannelIdPacket): Call<ClientboundPacket<PacketChannel>>
 
     @POST("channel/message/send")
-    fun setChannelMessageSend(@Body packet: PacketPlayOutTextMessage): Call<PacketPlayInMessageId>
+    fun setChannelMessageSend(@Body packet: PacketMessage): Call<ClientboundPacket<PacketMessageId>>
 }

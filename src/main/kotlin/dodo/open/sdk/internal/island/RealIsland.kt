@@ -5,10 +5,10 @@ import dodo.open.sdk.api.island.Island
 import dodo.open.sdk.api.member.Member
 import dodo.open.sdk.internal.bot.RealBot
 import dodo.open.sdk.internal.member.RealMember
-import dodo.open.sdk.internal.network.packet.PacketPlayOutChannelId
-import dodo.open.sdk.internal.network.packet.PacketPlayOutIslandId
-import dodo.open.sdk.internal.network.packet.PacketPlayOutMemberInfo
-import dodo.open.sdk.internal.network.packet.PacketPlayOutMemberList
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundChannelIdPacket
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundIslandIdPacket
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundIslandMemberPacket
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundMemberListPacket
 import dodo.open.sdk.internal.util.asyncExecute
 import java.util.concurrent.CompletableFuture
 
@@ -25,7 +25,7 @@ data class RealIsland(
 ) : Island {
 
     override fun getChannels(): CompletableFuture<List<Channel>> = bot.services.channel
-        .getChannelList(PacketPlayOutIslandId(islandId))
+        .getChannelList(ServerboundIslandIdPacket(islandId))
         .asyncExecute()
         .thenApply { packet ->
             packet.data.map {
@@ -47,7 +47,7 @@ data class RealIsland(
         }
 
     override fun getChannel(channelId: String): CompletableFuture<Channel> = bot.services.channel
-        .getChannelInfo(PacketPlayOutChannelId(channelId))
+        .getChannelInfo(ServerboundChannelIdPacket(channelId))
         .asyncExecute()
         .thenApply {
             RealChannel(
@@ -63,7 +63,7 @@ data class RealIsland(
         }
 
     override fun getMembers(): CompletableFuture<List<Member>> = bot.services.island
-        .getMemberList(PacketPlayOutMemberList(islandId, 0, 1))
+        .getMemberList(ServerboundMemberListPacket(islandId, 0, 1))
         .asyncExecute()
         .thenApply { packet ->
             packet.data.list.map {
@@ -85,7 +85,7 @@ data class RealIsland(
         }
 
     override fun getMember(dodoId: String): CompletableFuture<Member> = bot.services.island
-        .getMemberInfo(PacketPlayOutMemberInfo(dodoId, islandId))
+        .getMemberInfo(ServerboundIslandMemberPacket(dodoId, islandId))
         .asyncExecute()
         .thenApply {
             RealMember(
@@ -106,7 +106,7 @@ data class RealIsland(
 
     override fun leave() {
         bot.services.bot
-            .setBotIslandLeave(PacketPlayOutIslandId(islandId))
+            .setBotIslandLeave(ServerboundIslandIdPacket(islandId))
             .asyncExecute()
     }
 }

@@ -4,16 +4,15 @@ import dodo.open.sdk.api.bot.Bot
 import dodo.open.sdk.api.bot.BotInfo
 import dodo.open.sdk.api.island.Island
 import dodo.open.sdk.internal.island.RealIsland
-import dodo.open.sdk.internal.message.RealTextMessage
 import dodo.open.sdk.internal.network.Authorization
 import dodo.open.sdk.internal.network.RetrofitManager
-import dodo.open.sdk.internal.network.packet.PacketPlayOutIslandId
+import dodo.open.sdk.internal.network.packet.serverbound.ServerboundIslandIdPacket
 import dodo.open.sdk.internal.network.service.Services
 import dodo.open.sdk.internal.network.websocket.WebSocketConnection
 import dodo.open.sdk.internal.util.asyncExecute
 import java.util.concurrent.CompletableFuture
 
-class RealBot(auth: Authorization, internal val onMessage: (RealTextMessage) -> Unit) : Bot {
+class RealBot(auth: Authorization) : Bot {
     internal val services = Services(RetrofitManager(auth))
     private lateinit var connection: WebSocketConnection
 
@@ -43,7 +42,7 @@ class RealBot(auth: Authorization, internal val onMessage: (RealTextMessage) -> 
         }
 
     override fun getIsland(islandId: String): CompletableFuture<Island> = services.island
-        .getIslandInfo(PacketPlayOutIslandId(islandId))
+        .getIslandInfo(ServerboundIslandIdPacket(islandId))
         .asyncExecute()
         .thenApply {
             RealIsland(
