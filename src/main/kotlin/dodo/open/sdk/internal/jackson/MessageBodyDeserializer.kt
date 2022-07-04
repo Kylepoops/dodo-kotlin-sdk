@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import dodo.open.sdk.internal.network.packet.common.MessageBody
+import dodo.open.sdk.internal.network.packet.common.MessageBodyImage
 import dodo.open.sdk.internal.network.packet.common.MessageBodyText
 
 class MessageBodyDeserializer : JsonDeserializer<MessageBody>() {
@@ -13,6 +14,12 @@ class MessageBodyDeserializer : JsonDeserializer<MessageBody>() {
 
         return when {
             node.has("content") -> MessageBodyText(node.get("content").asText())
+            node.has("width") -> MessageBodyImage(
+                node.get("url").asText(),
+                node.get("width").asInt(),
+                node.get("height").asInt(),
+                node.get("isOriginal").asInt()
+            )
             else -> null
         }
     }

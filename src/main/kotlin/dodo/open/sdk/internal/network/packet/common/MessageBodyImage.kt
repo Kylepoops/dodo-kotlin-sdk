@@ -4,11 +4,14 @@ import dodo.open.sdk.api.bot.Bot
 import dodo.open.sdk.api.island.Channel
 import dodo.open.sdk.api.island.Island
 import dodo.open.sdk.api.member.Member
-import dodo.open.sdk.api.message.TextMessage
-import dodo.open.sdk.internal.message.RealTextMessage
+import dodo.open.sdk.api.message.Message
+import dodo.open.sdk.internal.message.RealImageMessage
 
-data class MessageBodyText(
-    val content: String
+data class MessageBodyImage(
+    val url: String,
+    val width: Int,
+    val height: Int,
+    val isOriginal: Int
 ) : MessageBody {
     override fun deserializeToMessage(
         bot: Bot,
@@ -18,16 +21,19 @@ data class MessageBodyText(
         messageId: Long,
         eventType: Int,
         timestamp: Long
-    ): TextMessage {
-        return RealTextMessage(
+    ): Message {
+        return RealImageMessage(
             bot,
+            url,
+            width,
+            height,
+            isOriginal == 1,
+            messageId,
             sender,
             island,
             channel,
-            content,
-            messageId,
             eventType,
-            timestamp,
+            timestamp
         )
     }
 }

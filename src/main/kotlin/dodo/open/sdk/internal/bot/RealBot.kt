@@ -10,11 +10,14 @@ import dodo.open.sdk.internal.network.packet.serverbound.ServerboundIslandIdPack
 import dodo.open.sdk.internal.network.service.Services
 import dodo.open.sdk.internal.network.websocket.WebSocketConnection
 import dodo.open.sdk.internal.util.asyncExecute
+import org.greenrobot.eventbus.EventBus
 import java.util.concurrent.CompletableFuture
 
 class RealBot(auth: Authorization) : Bot {
     internal val services = Services(RetrofitManager(auth))
     private lateinit var connection: WebSocketConnection
+
+    override val globalEventBus: EventBus = EventBus.builder().build()
 
     init {
         services.websocket.getWebSocketConnection()

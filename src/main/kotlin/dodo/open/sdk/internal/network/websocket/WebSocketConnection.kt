@@ -1,7 +1,5 @@
 package dodo.open.sdk.internal.network.websocket
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.DatabindException
 import dodo.open.sdk.api.event.ChannelMessageEvent
 import dodo.open.sdk.internal.bot.RealBot
 import dodo.open.sdk.internal.island.RealChannel
@@ -18,7 +16,6 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import org.greenrobot.eventbus.EventBus
 import java.util.concurrent.TimeUnit
 
 class WebSocketConnection(val bot: RealBot, endpoint: String) : WebSocketListener() {
@@ -38,29 +35,36 @@ class WebSocketConnection(val bot: RealBot, endpoint: String) : WebSocketListene
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
         val json = bytes.utf8()
+        val node = jsonMapper.readTree(json)
 
-        try {
-            val packet = jsonMapper.readValue(json, referType<PacketEvent<EventBodyChannelMessage>>())
-            handleTextMessage(packet)
-        } catch (ex: Throwable) {
-            ex.printStackTrace()
+        val type = node.get("data")
+            .get("eventType")
+            .asInt(0)
+
+        when (type) {
+            2001 -> handleChannelMessage(jsonMapper.readValue(json, referType<PacketEvent<EventBodyChannelMessage>>()))
         }
     }
 
-    fun handleTextMessage(packet: PacketEvent<EventBodyChannelMessage>) {
-        val island = bot.getIsland(packet.data.eventBody.islandId).get() as RealIsland
+    private fun handleChannelMessage(packet: PacketEvent<EventBodyChannelMessage>) {
+        val island = bot.getIsland(packet.data.eventBody.islandId).get()
+        val channel = island.getChannel(packet.data.eventBody.channelId)
+        val member = island.getMember(packet.data.eventBody.dodoId)
+        val messageId = packet.data.eventBody.messageId.toLong()
+        val timestamp = packet.data.timestamp
+        val messageType = packet.data.eventBody.messageType
+        val eventType = packet.data.eventType.toInt()
 
-        val message = RealTextMessage(
+        val message = packet.data.eventBody.messageBody.deserializeToMessage(
             bot,
-            island.getMember(packet.data.eventBody.dodoId).get() as RealMember,
             island,
-            island.getChannel(packet.data.eventBody.channelId).get() as RealChannel,
-            (packet.data.eventBody.messageBody as MessageBodyText).content,
-            packet.data.eventBody.messageId.toLong(),
-            packet.data.eventBody.messageType,
-            packet.data.timestamp
+            channel.get(),
+            member.get(),
+            messageId,
+            eventType,
+            timestamp,
         )
 
-        EventBus.getDefault().post(ChannelMessageEvent(message))
+        bot.globalEventBus.post(ChannelMessageEvent(message))
     }
 }
